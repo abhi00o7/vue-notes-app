@@ -24,17 +24,19 @@ const closeModal = () => {
 const addNote = () => {
   if (!textAreaInput.value)
     return (errorMessage.value = `Note can not be less than 1 characters.`);
+
   notes.value.push({
     id: randomNumber(10000, 99999),
     text: textAreaInput.value,
     color: randomLightColor(),
     date: new Date().toLocaleString(),
   });
-  textAreaInput.value = ``;
-  errorMessage.value = ``;
+
+  textAreaInput.value = errorMessage.value = ``;
   showModal.value = false;
 };
 </script>
+
 <template>
   <main>
     <div v-if="showModal" class="overlay">
