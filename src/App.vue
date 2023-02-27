@@ -4,30 +4,34 @@ import { ref } from "vue";
 const showModal = ref(false);
 const textAreaInput = ref("");
 const notes = ref([]);
-
+const errorMessage = ref("");
 /**
  *
  * @param {array of objects} notes
  */
 
 const randomLightColor = () =>
-  `hsl(${Math.floor(Math.random() * 361)}, 50%, 75%)`;
+  `hsl(${Math.floor(Math.random() * 361)}, 100%, 75%)`;
 
 const randomNumber = (min, max) =>
   Math.floor(Math.random() * (max - min + 1) + min);
 
+const closeModal = () => {
+  textAreaInput.value = ``;
+  errorMessage.value = ``;
+  showModal.value = false;
+};
 const addNote = () => {
-  const note = {
+  if (!textAreaInput.value)
+    return (errorMessage.value = `Note can not be less than 1 characters.`);
+  notes.value.push({
     id: randomNumber(10000, 99999),
     text: textAreaInput.value,
     color: randomLightColor(),
     date: new Date().toLocaleString(),
-  };
-  console.log({ note });
-  console.log({ notes });
-  notes.value.push(note);
-  console.log({ notes });
+  });
   textAreaInput.value = ``;
+  errorMessage.value = ``;
   showModal.value = false;
 };
 </script>
@@ -36,29 +40,35 @@ const addNote = () => {
     <div v-if="showModal" class="overlay">
       <div class="modal">
         <textarea
-          v-model="textAreaInput"
+          v-model.trim="textAreaInput"
           name="note"
           id="note"
           cols="30"
           rows="10"
         ></textarea>
+        <p v-if="errorMessage" class="errorField">
+          {{ errorMessage }}
+        </p>
         <button @click="addNote" @keyup.ctrl.enter="addNote">Add Note</button>
-        <button class="close" @click="showModal = false">Close</button>
+        <button class="close" @click="closeModal">Close</button>
       </div>
     </div>
     <div class="container">
       <header>
         <h1>Notes</h1>
-        {{ notes }}
         <button @click="showModal = true">+</button>
       </header>
       <div class="cards-container">
-        <div class="card">
+        <div
+          v-for="note in notes"
+          :key="note.id"
+          class="card"
+          :style="`background-color:${note.color}`"
+        >
           <p class="main-text">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Impedit
-            molestias amet id unde esse! Ut.
+            {{ note.text }}
           </p>
-          <p class="date"></p>
+          <p class="date">{{ note.date }}</p>
         </div>
       </div>
     </div>
@@ -66,11 +76,8 @@ const addNote = () => {
 </template>
 
 <style scoped>
-* {
-  outline: 1px solid limegreen;
-}
 .container {
-  max-width: 1000px;
+  max-width: 1080px;
   padding: 10px;
   margin: 0 auto;
 }
@@ -80,10 +87,9 @@ h1 {
   font-size: 75px;
 }
 .card {
-  outline: 1px solid red;
   width: 225px;
   height: 225px;
-  background-color: rgb(161, 78, 230);
+  background-color: rgb(161, 255, 230);
   padding: 10px;
   border-radius: 15px;
   display: flex;
@@ -115,14 +121,15 @@ header button {
   height: 50px;
   cursor: pointer;
   background-color: rgb(21, 20, 20);
-  border-radius: 1000px;
+  border-radius: 1080px;
   color: white;
   font-size: 20px;
 }
 .cards-container {
   display: flex;
   flex-wrap: wrap;
-  padding: 10px;
+  flex-direction: row;
+  padding-left: 20px;
 }
 .overlay {
   position: absolute;
@@ -175,5 +182,8 @@ textarea {
 .modal .close {
   background-color: #f00;
   margin-top: 7px;
+}
+.modal .errorField {
+  color: #f00;
 }
 </style>
